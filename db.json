@@ -1,0 +1,46 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "IPhone 13",
+      "price": "$800"
+    },
+    {
+      "id": 2,
+      "name": "Pixel 6",
+      "price": "$700"
+    }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "email": "test@mail.com",
+      "name": "Jo"
+    },
+    {
+      "id": 2,
+      "email": "test2@mail.com",
+      "name": "Jane"
+    }
+  ],
+  "carts": [
+    {
+      "userId": 2,
+      "productId": 2,
+      "quantity": 1,
+      "id": 1
+    },
+    {
+      "userId": 2,
+      "productId": 2,
+      "quantity": 1,
+      "id": 2
+    },
+    {
+      "userId": 2,
+      "productId": 1,
+      "quantity": 1,
+      "id": 3
+    }
+  ]
+}
