@@ -49,7 +49,7 @@ app.post('/api/users/login', async (req, res) => {
         email: z.string().email(),
         password: z.string(),
     });
-    const user = await User.parseAsync(req.body)
+    const user = User.parse(req.body)
     const userFromDb = await db.user.findUnique({
         where: {
             email: user.email
@@ -57,12 +57,16 @@ app.post('/api/users/login', async (req, res) => {
     })
     if (userFromDb) {
         if (await bcryptjs.compare(user.password, userFromDb.passwordHash)) {
+            // stateless - JWT - XSS 
             const token = await signAsync(
-                { userId: userFromDb.id },
+                { 
+                    userId: userFromDb.id,
+                    role: userFromDb.role
+                },
                 'secret',
                 { expiresIn: '1h' })
             // console.log(token)
-            return res.send({ token })
+            return res.send({ token: 'bearer ' + token })
         }
     }
     throw new createHttpError.Unauthorized('Wrong user\'s credentials')
@@ -78,21 +82,26 @@ app.post('/api/products', async (req, res) => {
         const decodedToken = await verifyAsync(token.replace(/bearer\s+/, ''), 'secret')
         const product = await Product.parseAsync(req.body)
         // const token = await verifyAsync()
-        const user = await db.user.findUnique({
-            where: {
-                id: decodedToken.userId
-            }
-        })
-        if (user?.role === 'ADMIN') {
+        // const user = await db.user.findUnique({
+        //     where: {
+        //         id: decodedToken.userId
+        //     }
+        // })
+        if (decodedToken?.role === 'ADMIN') {
             const newProduct = await db.product.create({
                 data: product
             })
-            res.send(newProduct)
+            return res.send(newProduct)
         } else {
             throw new createHttpError.Forbidden()
-        }
-        
+        }        
     }
+    throw new createHttpError.Unauthorized()
+})
+
+app.get('/api/products', async (req, res) => {
+    const products = await db.product.findMany()
+    res.send(products)
 })
 
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {

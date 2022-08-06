@@ -3,7 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { Routes, Route, Link, } from "react-router-dom";
 import styles from './App.module.css';
 import Cart from './Cart';
+import Login from './Login';
 import Main from './Main';
+import NewProduct from './products/NewProduct';
 
 function App() {
   const [user, setUser] = useState(null)
@@ -28,7 +30,9 @@ function App() {
       <header>
         <nav>
           <Link to="/">Main</Link> | {" "}
-          <Link to="/cart">Cart</Link>
+          <Link to="/cart">Cart</Link> | {" "}
+          <Link to="/login">Login</Link> | {" "}
+          <Link to="/create">Create</Link>
         </nav>
           {
             user ?
@@ -41,14 +45,22 @@ function App() {
         <Route path='/' element={
           <Main products={products} 
             setProducts={setProducts} 
-            user={user} />
+            user={user} 
+            setCount={setCount}
+            />
         } />
         <Route path='/cart' element={
-          <Cart products={products}              
+          <Cart products={products}
             carts={carts}
             count={count}
             setCarts={setCarts}
             user={user} />
+        } />
+        <Route path='/login' element={
+          <Login />
+        } />
+        <Route path='/create' element={
+          <NewProduct />
         } />
       </Routes>
     </>

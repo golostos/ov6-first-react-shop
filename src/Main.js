@@ -1,9 +1,9 @@
 import React, { useEffect } from "react"
 
 // @ts-check
-export default function Main({ products, setProducts, user }) {
+export default function Main({ products, setProducts, user, setCount }) {
   useEffect(() => {
-    fetch('http://localhost:4000/products')
+    fetch('/api/products')
       .then((res) => {
         if (!res.ok) throw new Error('Wrong products')
         return res.json()

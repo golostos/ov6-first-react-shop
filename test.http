@@ -47,10 +47,10 @@ Content-Type: application/json
 ###
 
 POST http://localhost:4000/api/products
-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTY1OTU1MTM3MCwiZXhwIjoxNjU5NTU0OTcwfQ.cG656Q9GvwqRhZbrcqEEoD3PK-X4ebKvSF1DtLXUlQQ
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJBRE1JTiIsImlhdCI6MTY1OTgwODIyMywiZXhwIjoxNjU5ODExODIzfQ.FZ3FVUckVJFQhgqEWcAz8fy_Dm8V_ujb2_b8NjPQFTs
 Content-Type: application/json
 
 {
-    "name": "Iphone 13",
+    "name": "Iphone 14",
     "price": 800
 }
