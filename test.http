@@ -43,3 +43,14 @@ Content-Type: application/json
     "email": "test@mail.com",
     "password": "test12345"
 }
+
+###
+
+POST http://localhost:4000/api/products
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTY1OTU1MTM3MCwiZXhwIjoxNjU5NTU0OTcwfQ.cG656Q9GvwqRhZbrcqEEoD3PK-X4ebKvSF1DtLXUlQQ
+Content-Type: application/json
+
+{
+    "name": "Iphone 13",
+    "price": 800
+}

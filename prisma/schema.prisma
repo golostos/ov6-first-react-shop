@@ -25,6 +25,7 @@ model User {
   id           Int      @id @default(autoincrement())
   name         String?
   email        String   @unique
+  role         Role     @default(USER)
   passwordHash String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -44,4 +45,9 @@ model Cart {
   productId Int
 
   @@map("carts")
+}
+
+enum Role {
+  ADMIN
+  USER
 }

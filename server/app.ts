@@ -6,6 +6,9 @@ import { z, ZodError } from "zod";
 import { db } from "./db";
 import { Prisma } from "@prisma/client";
 import createHttpError, { HttpError } from "http-errors";
+import { signAsync, verifyAsync } from "./auth";
+
+// const signAsync = promisify<string | Buffer | object, Secret, SignOptions | undefined>(sign)
 
 const app = express()
 app.use(express.json())
@@ -54,11 +57,42 @@ app.post('/api/users/login', async (req, res) => {
     })
     if (userFromDb) {
         if (await bcryptjs.compare(user.password, userFromDb.passwordHash)) {
-            // Cookies TODO
-            return res.send('Ok')
+            const token = await signAsync(
+                { userId: userFromDb.id },
+                'secret',
+                { expiresIn: '1h' })
+            // console.log(token)
+            return res.send({ token })
         }
     }
     throw new createHttpError.Unauthorized('Wrong user\'s credentials')
+})
+
+app.post('/api/products', async (req, res) => {
+    const Product = z.object({
+        name: z.string(),
+        price: z.number()
+    })
+    const token = req.header('Authorization')
+    if (token) {
+        const decodedToken = await verifyAsync(token.replace(/bearer\s+/, ''), 'secret')
+        const product = await Product.parseAsync(req.body)
+        // const token = await verifyAsync()
+        const user = await db.user.findUnique({
+            where: {
+                id: decodedToken.userId
+            }
+        })
+        if (user?.role === 'ADMIN') {
+            const newProduct = await db.product.create({
+                data: product
+            })
+            res.send(newProduct)
+        } else {
+            throw new createHttpError.Forbidden()
+        }
+        
+    }
 })
 
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
