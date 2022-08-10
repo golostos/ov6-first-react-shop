@@ -34,9 +34,10 @@ const NewProduct = () => {
           event.preventDefault()
           const res = await fetch('/api/products', {
             method: 'POST',
+            credentials: 'same-origin',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': localStorage.getItem('token')
+              // 'Authorization': localStorage.getItem('token')
             },
             body: JSON.stringify({
               name,

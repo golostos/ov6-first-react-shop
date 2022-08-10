@@ -42,8 +42,8 @@ const Login = () => {
             })
           })
           if (res.ok) {
-            const token = (await res.json()).token
-            if (token) localStorage.setItem('token', token)
+            // const token = (await res.json()).token
+            // if (token) localStorage.setItem('token', token)
             nav('/')
           }
         }}>

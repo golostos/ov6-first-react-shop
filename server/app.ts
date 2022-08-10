@@ -1,3 +1,4 @@
+require('dotenv').config()
 // es modules
 import express, { ErrorRequestHandler } from "express";
 require('express-async-errors');
@@ -6,21 +7,13 @@ import { z, ZodError } from "zod";
 import { db } from "./db";
 import { Prisma } from "@prisma/client";
 import createHttpError, { HttpError } from "http-errors";
-import { signAsync, verifyAsync } from "./auth";
-
-// const signAsync = promisify<string | Buffer | object, Secret, SignOptions | undefined>(sign)
+import { JsonWebTokenError } from "jsonwebtoken";
+import cookieParser from "cookie-parser";
+import { checkSession, createSession } from "./auth";
 
 const app = express()
 app.use(express.json())
-
-// const validator: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
-//     const user = req.body
-//     if (typeof user.name === 'string'
-//         && typeof user.email === 'string'
-//         && typeof user.password === 'string'
-//         && Object.keys(user).length === 3) return next()
-//     res.send({ error: "Wrong user" })
-// }
+app.use(cookieParser())
 
 app.post('/api/users/signup', async (req, res, next) => {
     const User = z.object({
@@ -57,37 +50,22 @@ app.post('/api/users/login', async (req, res) => {
     })
     if (userFromDb) {
         if (await bcryptjs.compare(user.password, userFromDb.passwordHash)) {
-            // stateless - JWT - XSS 
-            const token = await signAsync(
-                { 
-                    userId: userFromDb.id,
-                    role: userFromDb.role
-                },
-                'secret',
-                { expiresIn: '1h' })
-            // console.log(token)
-            return res.send({ token: 'bearer ' + token })
+            const session = await createSession(res, userFromDb.id)
+            return res.send({ status: "Successful" })
         }
     }
     throw new createHttpError.Unauthorized('Wrong user\'s credentials')
 })
 
-app.post('/api/products', async (req, res) => {
+app.post('/api/products', checkSession, async (req, res) => {
     const Product = z.object({
         name: z.string(),
         price: z.number()
     })
-    const token = req.header('Authorization')
-    if (token) {
-        const decodedToken = await verifyAsync(token.replace(/bearer\s+/, ''), 'secret')
-        const product = await Product.parseAsync(req.body)
-        // const token = await verifyAsync()
-        // const user = await db.user.findUnique({
-        //     where: {
-        //         id: decodedToken.userId
-        //     }
-        // })
-        if (decodedToken?.role === 'ADMIN') {
+    const product = await Product.parseAsync(req.body)
+    const user = req.user
+    if (user) {
+        if (user.role === 'ADMIN') {
             const newProduct = await db.product.create({
                 data: product
             })
@@ -109,6 +87,7 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
     if (err instanceof Prisma.PrismaClientKnownRequestError) {
         if (err.code === 'P2002') res.status(409)
     }
+    if (err instanceof JsonWebTokenError) res.status(403)
     if (err instanceof HttpError) res.status(err.status)
     console.error(err)
     res.send(err)
